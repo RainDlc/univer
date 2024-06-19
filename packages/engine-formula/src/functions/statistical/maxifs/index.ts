@@ -100,6 +100,10 @@ export class Maxifs extends BaseFunction {
             });
         }
 
+        return this._aggregateResults(maxRange, booleanResults);
+    }
+
+    private _aggregateResults(maxRange: BaseValueObject, booleanResults: BaseValueObject[][]): ArrayValueObject {
         const maxResults = booleanResults.map((row) => {
             return row.map((booleanResult) => {
                 const picked = (maxRange as ArrayValueObject).pick(booleanResult as ArrayValueObject);
