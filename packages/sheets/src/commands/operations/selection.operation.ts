@@ -34,9 +34,7 @@ export const SetSelectionsOperation: IOperation<ISetSelectionsOperationParams> =
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
-        if (!params) {
-            return false;
-        }
+        if (!params) return false;
 
         const { selections, type } = params;
         selectionManagerService.replace(selections, type);

@@ -438,8 +438,4 @@ export class SelectionManagerService implements IDisposable {
 
         this._refresh(param);
     }
-
-    // private refreshCurrentSelection(): void {
-    //     this._currentSelection$.next(this._currentSelection);
-    // }
 }

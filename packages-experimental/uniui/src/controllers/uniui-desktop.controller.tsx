@@ -15,11 +15,10 @@
  */
 
 import { Disposable, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IWorkbenchOptions } from '@univerjs/ui';
-import { BuiltInUIPart, CanvasPopup, FloatDom, ILayoutService, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, CanvasPopup, FloatDom, IUIPartsService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
-import { Inject, Injector, Optional } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 import React from 'react';
 import { delay, filter, take } from 'rxjs';
@@ -31,11 +30,9 @@ const STEADY_TIMEOUT = 3000;
 
 export class UniverUniUIController extends Disposable {
     constructor(
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
-        @IUIPartsService private readonly _uiPartsService: IUIPartsService,
-        @Optional(ILayoutService) private readonly _layoutService?: ILayoutService
+        @IUIPartsService private readonly _uiPartsService: IUIPartsService
     ) {
         super();
         this._initBuiltinComponents();
