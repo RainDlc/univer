@@ -23,10 +23,10 @@ import { ArrayValueObject, transformToValueObject } from '../../../../engine/val
 import { ErrorType } from '../../../../basics/error-type';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
-describe('Test min function', () => {
-    const testFunction = new Mina(FUNCTION_NAMES_STATISTICAL.MIN);
+describe('Test mina function', () => {
+    const testFunction = new Mina(FUNCTION_NAMES_STATISTICAL.MINA);
 
-    describe('Min', () => {
+    describe('Mina', () => {
         it('Var1 is number, var2 is number', () => {
             const var1 = NumberValueObject.create(1);
             const var2 = NumberValueObject.create(2);
