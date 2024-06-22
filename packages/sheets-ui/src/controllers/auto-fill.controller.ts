@@ -175,6 +175,7 @@ export class AutoFillController extends Disposable {
         this._autoFillService.setShowMenu(false);
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _onSelectionControlFillChanged() {
         const disposableCollection = new DisposableCollection();
         const addListener = (disposableCollection: DisposableCollection) => {
@@ -226,7 +227,7 @@ export class AutoFillController extends Disposable {
                     // fill results will be as same as drag operation
                 disposableCollection.add(
                     toDisposable(
-                        controlSelection.fillControl.onDblclickObserver.add(() => {
+                        controlSelection.fillControl.onDblclick$.subscribeEvent(() => {
                             const source = {
                                 startColumn: controlSelection.model.startColumn,
                                 endColumn: controlSelection.model.endColumn,
@@ -276,6 +277,7 @@ export class AutoFillController extends Disposable {
         );
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _triggerAutoFill(source: IRange, selection: IRange) {
         // if source range === dest range, do nothing;
         if (

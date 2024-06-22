@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { EventState, IKeyValue, ITransformState, Nullable, Observer } from '@univerjs/core';
-import { Disposable, EventSubject, Observable } from '@univerjs/core';
+import type { EventState, IKeyValue, ITransformState, Nullable, Observable, Observer } from '@univerjs/core';
+import { Disposable, EventSubject } from '@univerjs/core';
 
 import type { EVENT_TYPE } from './basics/const';
 import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
@@ -48,29 +48,27 @@ export abstract class BaseObject extends Disposable {
     groupKey?: string;
     isInGroup: boolean = false;
 
-    onTransformChangeObservable = new Observable<ITransformChangeState>();
+    onTransformChange$ = new EventSubject<ITransformChangeState>();
+
     pointerDown$ = new EventSubject<IPointerEvent | IMouseEvent>();
-    onPointerMoveObserver = new Observable<IPointerEvent | IMouseEvent>();
-    onPointerUpObserver = new Observable<IPointerEvent | IMouseEvent>();
-    onDblclickObserver = new Observable<IPointerEvent | IMouseEvent>();
-    onTripleClickObserver = new Observable<IPointerEvent | IMouseEvent>();
-    onMouseWheelObserver = new Observable<IWheelEvent>();
+    onPointerMove$ = new EventSubject<IPointerEvent | IMouseEvent>();
+    onPointerUp$ = new EventSubject<IPointerEvent | IMouseEvent>();
+    onPointerOut$ = new EventSubject<IPointerEvent | IMouseEvent>();
+    onPointerOver$ = new EventSubject<IPointerEvent | IMouseEvent>();
+    onPointerLeave$ = new EventSubject<IPointerEvent | IMouseEvent>();
+    onPointerEnter$ = new EventSubject<IPointerEvent | IMouseEvent>();
 
-    onPointerOutObserver = new Observable<IPointerEvent | IMouseEvent>();
-    onPointerLeaveObserver = new Observable<IPointerEvent | IMouseEvent>();
-    onPointerOverObserver = new Observable<IPointerEvent | IMouseEvent>();
-    onPointerEnterObserver = new Observable<IPointerEvent | IMouseEvent>();
+    onDblclick$ = new EventSubject<IPointerEvent | IMouseEvent>();
+    onTripleClick$ = new EventSubject<IPointerEvent | IMouseEvent>();
+    onMouseWheel$ = new EventSubject<IWheelEvent>();
 
-    onDragLeaveObserver = new Observable<IDragEvent | IMouseEvent>();
+    onDragLeave$ = new EventSubject<IDragEvent | IMouseEvent>();
+    onDragOver$ = new EventSubject<IDragEvent | IMouseEvent>();
+    onDragEnter$ = new EventSubject<IDragEvent | IMouseEvent>();
+    onDrop$ = new EventSubject<IDragEvent | IMouseEvent>();
 
-    onDragOverObserver = new Observable<IDragEvent | IMouseEvent>();
-
-    onDragEnterObserver = new Observable<IDragEvent | IMouseEvent>();
-
-    onDropObserver = new Observable<IDragEvent | IMouseEvent>();
-
-    onIsAddedToParentObserver = new Observable<any>();
-    onDisposeObserver = new Observable<BaseObject>();
+    onIsAddedToParent$ = new EventSubject<any>();
+    onDispose$ = new EventSubject<BaseObject>();
 
     protected _oKey: string;
 
@@ -434,7 +432,7 @@ export abstract class BaseObject extends Disposable {
 
         this._setTransForm();
 
-        this.onTransformChangeObservable.notifyObservers({
+        this.onTransformChange$.emitEvent({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.translate,
             value: { top: this._top, left: this._left },
             preValue: { top: preTop, left: preLeft },
@@ -455,7 +453,7 @@ export abstract class BaseObject extends Disposable {
 
         this._setTransForm();
 
-        this.onTransformChangeObservable.notifyObservers({
+        this.onTransformChange$.emitEvent({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize,
             value: { width: this._width, height: this._height },
             preValue: { width: preWidth, height: preHeight },
@@ -477,7 +475,7 @@ export abstract class BaseObject extends Disposable {
 
         this._setTransForm();
 
-        this.onTransformChangeObservable.notifyObservers({
+        this.onTransformChange$.emitEvent({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale,
             value: { scaleX: this._scaleX, scaleY: this._scaleY },
             preValue: { scaleX: preScaleX, scaleY: preScaleY },
@@ -499,7 +497,7 @@ export abstract class BaseObject extends Disposable {
 
         this._setTransForm();
 
-        this.onTransformChangeObservable.notifyObservers({
+        this.onTransformChange$.emitEvent({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.skew,
             value: { skewX: this._skewX, skewY: this._skewY },
             preValue: { skewX: preSkewX, skewY: preSkewY },
@@ -520,7 +518,7 @@ export abstract class BaseObject extends Disposable {
 
         this._setTransForm();
 
-        this.onTransformChangeObservable.notifyObservers({
+        this.onTransformChange$.emitEvent({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.flip,
             value: { flipX: this._flipX, flipY: this._flipY },
             preValue: { flipX: preFlipX, flipY: preFlipY },
@@ -546,7 +544,7 @@ export abstract class BaseObject extends Disposable {
 
         this._setTransForm();
 
-        this.onTransformChangeObservable.notifyObservers({
+        this.onTransformChange$.emitEvent({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.all,
             value: option,
             preValue: preKeys,
@@ -627,7 +625,7 @@ export abstract class BaseObject extends Disposable {
     }
 
     triggerPointerMove(evt: IPointerEvent | IMouseEvent) {
-        if (!this.onPointerMoveObserver.notifyObservers(evt)?.stopPropagation) {
+        if (!this.onPointerMove$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerPointerMove(evt);
             return false;
         }
@@ -643,7 +641,7 @@ export abstract class BaseObject extends Disposable {
     }
 
     triggerPointerUp(evt: IPointerEvent | IMouseEvent) {
-        if (!this.onPointerUpObserver.notifyObservers(evt)?.stopPropagation) {
+        if (!this.onPointerUp$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerPointerUp(evt);
             return false;
         }
@@ -651,7 +649,7 @@ export abstract class BaseObject extends Disposable {
     }
 
     triggerDblclick(evt: IPointerEvent | IMouseEvent) {
-        if (!this.onDblclickObserver.notifyObservers(evt)?.stopPropagation) {
+        if (!this.onDblclick$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerDblclick(evt);
 
             return false;
@@ -661,7 +659,7 @@ export abstract class BaseObject extends Disposable {
     }
 
     triggerTripleClick(evt: IPointerEvent | IMouseEvent) {
-        if (!this.onTripleClickObserver.notifyObservers(evt)?.stopPropagation) {
+        if (!this.onTripleClick$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerTripleClick(evt);
 
             return false;
@@ -671,7 +669,7 @@ export abstract class BaseObject extends Disposable {
     }
 
     triggerMouseWheel(evt: IWheelEvent) {
-        if (!this.onMouseWheelObserver.notifyObservers(evt)?.stopPropagation) {
+        if (!this.onMouseWheel$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerMouseWheel(evt);
             return false;
         }
@@ -689,7 +687,7 @@ export abstract class BaseObject extends Disposable {
     // }
 
     triggerPointerOut(evt: IPointerEvent | IMouseEvent) {
-        if (!this.onPointerOutObserver.notifyObservers(evt)?.stopPropagation) {
+        if (!this.onPointerOut$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerPointerOut(evt);
             return false;
         }
@@ -697,7 +695,7 @@ export abstract class BaseObject extends Disposable {
     }
 
     triggerPointerLeave(evt: IPointerEvent | IMouseEvent) {
-        if (!this.onPointerLeaveObserver.notifyObservers(evt)?.stopPropagation) {
+        if (!this.onPointerLeave$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerPointerLeave(evt);
             return false;
         }
@@ -705,7 +703,7 @@ export abstract class BaseObject extends Disposable {
     }
 
     triggerPointerOver(evt: IPointerEvent | IMouseEvent) {
-        if (!this.onPointerOverObserver.notifyObservers(evt)) {
+        if (!this.onPointerOver$.emitEvent(evt)) {
             this._parent?.triggerPointerOver(evt);
             return false;
         }
@@ -713,7 +711,7 @@ export abstract class BaseObject extends Disposable {
     }
 
     triggerPointerEnter(evt: IPointerEvent | IMouseEvent) {
-        if (!this.onPointerEnterObserver.notifyObservers(evt)?.stopPropagation) {
+        if (!this.onPointerEnter$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerPointerEnter(evt);
             return false;
         }
@@ -721,7 +719,7 @@ export abstract class BaseObject extends Disposable {
     }
 
     triggerDragLeave(evt: IDragEvent | IMouseEvent) {
-        if (!this.onDragLeaveObserver.notifyObservers(evt)?.stopPropagation) {
+        if (!this.onDragLeave$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerDragLeave(evt);
             return false;
         }
@@ -729,7 +727,7 @@ export abstract class BaseObject extends Disposable {
     }
 
     triggerDragOver(evt: IDragEvent | IMouseEvent) {
-        if (!this.onDragOverObserver.notifyObservers(evt)?.stopPropagation) {
+        if (!this.onDragOver$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerDragOver(evt);
             return false;
         }
@@ -737,7 +735,7 @@ export abstract class BaseObject extends Disposable {
     }
 
     triggerDragEnter(evt: IDragEvent | IMouseEvent) {
-        if (!this.onDragEnterObserver.notifyObservers(evt)?.stopPropagation) {
+        if (!this.onDragEnter$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerDragEnter(evt);
             return false;
         }
@@ -745,7 +743,7 @@ export abstract class BaseObject extends Disposable {
     }
 
     triggerDrop(evt: IDragEvent | IMouseEvent) {
-        if (!this.onDropObserver.notifyObservers(evt)?.stopPropagation) {
+        if (!this.onDrop$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerDrop(evt);
             return false;
         }
@@ -754,30 +752,30 @@ export abstract class BaseObject extends Disposable {
 
     override dispose() {
         super.dispose();
-        this.onTransformChangeObservable.clear();
+        this.onTransformChange$.complete();
         this.pointerDown$.complete();
-        this.onPointerMoveObserver.clear();
-        this.onPointerUpObserver.clear();
-        this.onMouseWheelObserver.clear();
-        this.onPointerOutObserver.clear();
-        this.onPointerLeaveObserver.clear();
-        this.onPointerOverObserver.clear();
-        this.onPointerEnterObserver.clear();
-        this.onDragLeaveObserver.clear();
-        this.onDragOverObserver.clear();
-        this.onDragEnterObserver.clear();
-        this.onDropObserver.clear();
-        this.onDblclickObserver.clear();
-        this.onTripleClickObserver.clear();
-        this.onIsAddedToParentObserver.clear();
+        this.onPointerMove$.complete();
+        this.onPointerUp$.complete();
+        this.onMouseWheel$.complete();
+        this.onPointerOut$.complete();
+        this.onPointerLeave$.complete();
+        this.onPointerOver$.complete();
+        this.onPointerEnter$.complete();
+        this.onDragLeave$.complete();
+        this.onDragOver$.complete();
+        this.onDragEnter$.complete();
+        this.onDrop$.complete();
+        this.onDblclick$.complete();
+        this.onTripleClick$.complete();
+        this.onIsAddedToParent$.complete();
 
         this.parent?.removeObject(this);
 
-        this.onDisposeObserver.notifyObservers(this);
+        this.onDispose$.emitEvent(this);
 
         this._makeDirtyMix();
 
-        this.onDisposeObserver.clear();
+        this.onDispose$.complete();
 
         this._parent = null;
         this._layer = null;

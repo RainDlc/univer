@@ -91,7 +91,7 @@ export class TextSelectionController extends Disposable {
         const { document, scene } = docObject;
         this.disposeWithMe(
             toDisposable(
-                document.onPointerEnterObserver.add(() => {
+                document.onPointerEnter$.subscribeEvent(() => {
                     if (this._isEditorReadOnly(unitId)) {
                         return;
                     }
@@ -102,7 +102,7 @@ export class TextSelectionController extends Disposable {
 
         this.disposeWithMe(
             toDisposable(
-                document.onPointerLeaveObserver.add(() => {
+                document.onPointerLeave$.subscribeEvent(() => {
                     document.cursor = CURSOR_TYPE.DEFAULT;
                     scene.resetCursor();
                 })
@@ -150,7 +150,7 @@ export class TextSelectionController extends Disposable {
 
         this.disposeWithMe(
             toDisposable(
-                document?.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent) => {
+                document?.onDblclick$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
                     if (this._isEditorReadOnly(unitId)) {
                         return;
                     }
@@ -161,7 +161,7 @@ export class TextSelectionController extends Disposable {
 
         this.disposeWithMe(
             toDisposable(
-                document?.onTripleClickObserver.add((evt: IPointerEvent | IMouseEvent) => {
+                document?.onTripleClick$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
                     if (this._isEditorReadOnly(unitId)) {
                         return;
                     }

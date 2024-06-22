@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { EventState, IKeyValue, Nullable, Observer } from '@univerjs/core';
-import { Disposable, EventSubject, Observable } from '@univerjs/core';
+import type { EventState, IKeyValue, Nullable, Observable, Observer } from '@univerjs/core';
+import { Disposable, EventSubject } from '@univerjs/core';
 
 import type { BaseObject } from './base-object';
 import type { CURSOR_TYPE, EVENT_TYPE } from './basics/const';
@@ -25,39 +25,41 @@ import type { ITransformChangeState } from './basics/interfaces';
 import { Transform } from './basics/transform';
 import type { Vector2 } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
+import type { ThinEngine } from './thin-engine';
+import type { Scene } from './scene';
 
 export abstract class ThinScene extends Disposable {
-    onTransformChangeObservable = new Observable<ITransformChangeState>();
+    onTransformChange$ = new EventSubject<ITransformChangeState>();
 
-    onFileLoadedObservable = new Observable<string>();
+    onFileLoaded$ = new EventSubject<string>();
 
     pointerDown$ = new EventSubject<IPointerEvent | IMouseEvent>();
 
-    onPointerMoveObserver = new Observable<IPointerEvent | IMouseEvent>();
+    onPointerMove$ = new EventSubject<IPointerEvent | IMouseEvent>();
 
-    onPointerUpObserver = new Observable<IPointerEvent | IMouseEvent>();
+    onPointerUp$ = new EventSubject<IPointerEvent | IMouseEvent>();
 
-    onPointerEnterObserver = new Observable<IPointerEvent | IMouseEvent>();
+    onPointerEnter$ = new EventSubject<IPointerEvent | IMouseEvent>();
 
-    onPointerLeaveObserver = new Observable<IPointerEvent | IMouseEvent>();
+    onPointerLeave$ = new EventSubject<IPointerEvent | IMouseEvent>();
 
-    onDragEnterObserver = new Observable<IDragEvent>();
+    onDragEnter$ = new EventSubject<IDragEvent>();
 
-    onDragOverObserver = new Observable<IDragEvent>();
+    onDragOver$ = new EventSubject<IDragEvent>();
 
-    onDragLeaveObserver = new Observable<IDragEvent>();
+    onDragLeave$ = new EventSubject<IDragEvent>();
 
-    onDropObserver = new Observable<IDragEvent>();
+    onDrop$ = new EventSubject<IDragEvent>();
 
-    onDblclickObserver = new Observable<IPointerEvent | IMouseEvent>();
+    onDblclick$ = new EventSubject<IPointerEvent | IMouseEvent>();
 
-    onTripleClickObserver = new Observable<IPointerEvent | IMouseEvent>();
+    onTripleClick$ = new EventSubject<IPointerEvent | IMouseEvent>();
 
-    onMouseWheelObserver = new Observable<IWheelEvent>();
+    onMouseWheel$ = new EventSubject<IWheelEvent>();
 
-    onKeyDownObservable = new Observable<IKeyboardEvent>();
+    onKeyDown$ = new EventSubject<IKeyboardEvent>();
 
-    onKeyUpObservable = new Observable<IKeyboardEvent>();
+    onKeyUp$ = new EventSubject<IKeyboardEvent>();
 
     debounceParentTimeout: number = -1;
 
@@ -157,14 +159,14 @@ export abstract class ThinScene extends Disposable {
     }
 
     triggerKeyDown(evt: IKeyboardEvent) {
-        this.onKeyDownObservable.notifyObservers(evt);
+        this.onKeyDown$.emitEvent(evt);
         // if (this._parent instanceof SceneViewer) {
         //     this._parent?.triggerKeyDown(evt);
         // }
     }
 
     triggerKeyUp(evt: IKeyboardEvent) {
-        this.onKeyUpObservable.notifyObservers(evt);
+        this.onKeyUp$.emitEvent(evt);
         // if (this._parent instanceof SceneViewer) {
         //     this._parent?.triggerKeyUp(evt);
         // }
@@ -203,22 +205,22 @@ export abstract class ThinScene extends Disposable {
     abstract getParent(): any;
 
     override dispose(): void {
-        this.onTransformChangeObservable.clear();
-        this.onFileLoadedObservable.clear();
+        this.onTransformChange$.complete();
+        this.onFileLoaded$.complete();
         this.pointerDown$.complete();
-        this.onPointerMoveObserver.clear();
-        this.onPointerUpObserver.clear();
-        this.onPointerEnterObserver.clear();
-        this.onPointerLeaveObserver.clear();
-        this.onDragEnterObserver.clear();
-        this.onDragOverObserver.clear();
-        this.onDragLeaveObserver.clear();
-        this.onDropObserver.clear();
-        this.onDblclickObserver.clear();
-        this.onTripleClickObserver.clear();
-        this.onMouseWheelObserver.clear();
-        this.onKeyDownObservable.clear();
-        this.onKeyUpObservable.clear();
+        this.onPointerMove$.complete();
+        this.onPointerUp$.complete();
+        this.onPointerEnter$.complete();
+        this.onPointerLeave$.complete();
+        this.onDragEnter$.complete();
+        this.onDragOver$.complete();
+        this.onDragLeave$.complete();
+        this.onDrop$.complete();
+        this.onDblclick$.complete();
+        this.onTripleClick$.complete();
+        this.onMouseWheel$.complete();
+        this.onKeyDown$.complete();
+        this.onKeyUp$.complete();
 
         super.dispose();
     }
@@ -229,7 +231,7 @@ export abstract class ThinScene extends Disposable {
 
     abstract addObjects(objects: BaseObject[], zIndex?: number): void;
 
-    abstract getEngine(): any;
+    abstract getEngine(): Nullable<ThinEngine<Scene>>;
 
     abstract setObjectBehavior(o: BaseObject): void;
 

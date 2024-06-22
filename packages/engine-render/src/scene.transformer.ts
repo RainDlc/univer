@@ -164,8 +164,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
     private _viewportScrollX: number = -1;
     private _viewportScrollY: number = -1;
 
-    private _moveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
-    private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _topScenePointerMoveSub: Nullable<Subscription>;
+    private _topScenePointerUpSub: Nullable<Subscription>;
     private _cancelFocusSubscription: Nullable<Subscription>;
 
     private _transformerControlMap = new Map<string, Group>();
@@ -315,8 +315,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
     // eslint-disable-next-line max-lines-per-function
     attachTo(applyObject: BaseObject) {
         if (this.hoverEnabled) {
-            this.hoverEnterFunc && applyObject.onPointerEnterObserver.add(this.hoverEnterFunc);
-            this.hoverLeaveFunc && applyObject.onPointerLeaveObserver.add(this.hoverLeaveFunc);
+            this.hoverEnterFunc && applyObject.onPointerEnter$.subscribeEvent(this.hoverEnterFunc);
+            this.hoverLeaveFunc && applyObject.onPointerLeave$.subscribeEvent(this.hoverLeaveFunc);
         }
 
         const observer = applyObject.pointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
@@ -346,16 +346,12 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
             if (!isCropper) {
                 this._updateActiveObjectList(applyObject, evt);
-            } else {
-                this._copperSelectedObject = applyObject;
-            }
-
-            if (!isCropper) {
                 this.onChangeStartObservable.notifyObservers({
                     objects: this._selectedObjectMap,
                     type: MoveObserverType.MOVE_START,
                 });
             } else {
+                this._copperSelectedObject = applyObject;
                 this.onChangeStartObservable.notifyObservers({
                     objects: new Map([[applyObject.oKey, applyObject]]) as Map<string, BaseObject>,
                     type: MoveObserverType.MOVE_START,
@@ -364,7 +360,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
             this._moveBufferSkip = false;
 
-            const moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+            const scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
                 const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
                 this._moving(moveOffsetX, moveOffsetY, scrollTimer, isCropper);
 
@@ -375,9 +371,10 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 });
             });
 
-            const upObserver = scene.onPointerUpObserver.add(() => {
-                moveObserver?.dispose();
-                upObserver?.dispose();
+            // const upObserver = scene.onPointerUpObserver.add(() => {
+            const scenePointerUpSub = scene.onPointerUp$.subscribeEvent(() => {
+                scenePointerMoveSub?.unsubscribe();
+                scenePointerUpSub?.unsubscribe();
                 scene.enableEvent();
                 !isCropper && this.refreshControls();
                 scrollTimer.dispose();
@@ -422,14 +419,14 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     override dispose() {
-        this._moveObserver?.dispose();
-        this._upObserver?.dispose();
+        this._topScenePointerMoveSub?.unsubscribe();
+        this._topScenePointerUpSub?.unsubscribe();
 
         this._cancelFocusSubscription?.unsubscribe();
         this._cancelFocusSubscription = null;
 
-        this._moveObserver = null;
-        this._upObserver = null;
+        this._topScenePointerMoveSub = null;
+        this._topScenePointerUpSub = null;
         this._cancelFocusSubscription = null;
 
         this._transformerControlMap.forEach((control) => {
@@ -873,6 +870,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
         };
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _attachEventToAnchor(anchor: BaseObject, type = TransformerManagerType.RESIZE_LT, applyObject: BaseObject) {
         this.disposeWithMe(
             toDisposable(
@@ -916,7 +914,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                     }
 
                     this._moveBufferSkip = false;
-                    this._moveObserver = topScene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+                    this._topScenePointerMoveSub = topScene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
                         const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
                         this._anchorMoving(type, moveOffsetX, moveOffsetY, scrollTimer, keepRatio, isCropper, applyObject);
                         scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
@@ -925,9 +923,12 @@ export class Transformer extends Disposable implements ITransformerConfig {
                         topScene.setCursor(cursor);
                     });
 
-                    this._upObserver = topScene.onPointerUpObserver.add(() => {
-                        topScene.onPointerMoveObserver.remove(this._moveObserver);
-                        topScene.onPointerUpObserver.remove(this._upObserver);
+                    // this._upObserver = topScene.onPointerUpObserver.add(() => {
+                    this._topScenePointerUpSub = topScene.onPointerUp$.subscribeEvent(() => {
+                        // topScene.onPointerMove$.remove(this._moveObserver);
+                        // topScene.onPointerUp$.remove(this._topScenePointerUpSub);
+                        this._topScenePointerMoveSub?.unsubscribe();
+                        this._topScenePointerUpSub?.unsubscribe();
                         topScene.enableEvent();
                         topScene.resetCursor();
                         scrollTimer.dispose();
@@ -1014,15 +1015,17 @@ export class Transformer extends Disposable implements ITransformerConfig {
                     });
 
                     this._moveBufferSkip = false;
-                    const moveObserver = topScene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+                    const topScenePointerMoveSub = topScene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
                         const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
                         this._rotateMoving(moveOffsetX, moveOffsetY, centerX, centerY, agentOrigin);
                         topScene.setCursor(cursor);
                     });
 
-                    const upObserver = topScene.onPointerUpObserver.add(() => {
-                        moveObserver?.dispose();
-                        upObserver?.dispose();
+                    const topScenePointerUpSub = topScene.onPointerUp$.subscribeEvent(() => {
+                        // topScenePointerMoveSub?.dispose();
+                        // topScenePointerUpSub?.dispose();
+                        topScenePointerMoveSub?.unsubscribe();
+                        topScenePointerUpSub?.unsubscribe();
                         topScene.enableEvent();
                         topScene.resetCursor();
                         this.refreshControls();
@@ -1459,7 +1462,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     private _attachHover(o: BaseObject, cursorIn: CURSOR_TYPE, cursorOut: CURSOR_TYPE) {
         this.disposeWithMe(
             toDisposable(
-                o.onPointerEnterObserver.add(() => {
+                o.onPointerEnter$.subscribeEvent(() => {
                     o.cursor = cursorIn;
                 })
             )
@@ -1467,7 +1470,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
         this.disposeWithMe(
             toDisposable(
-                o.onPointerLeaveObserver.add(() => {
+                o.onPointerLeave$.subscribeEvent(() => {
                     o.cursor = cursorOut;
                 })
             )
