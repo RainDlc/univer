@@ -291,6 +291,9 @@ export class Documents extends DocComponent {
 
             this._startRotation(ctx, finalAngle);
 
+            // ctx.save();
+            // ctx.globalAlpha = 0.5;
+
             for (const section of sections) {
                 const { columns } = section;
 
@@ -485,6 +488,7 @@ export class Documents extends DocComponent {
                     this._drawLiquid.translateRestore();
                 }
             }
+            // ctx.restore();
 
             this._resetRotation(ctx, finalAngle);
 

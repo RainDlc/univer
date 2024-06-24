@@ -736,7 +736,7 @@ export function getFontConfigFromLastGlyph(
 
 export function getFontCreateConfig(
     index: number,
-    bodyModel: DocumentViewModel,
+    viewModel: DocumentViewModel,
     paragraphNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
     paragraphStyle: IParagraphStyle
@@ -757,9 +757,10 @@ export function getFontCreateConfig(
     } = sectionBreakConfig;
     const { isRenderStyle } = renderConfig;
     const { startIndex } = paragraphNode;
+
     const textRun = isRenderStyle === BooleanNumber.FALSE
         ? { ts: {}, st: 0, ed: 0 }
-        : bodyModel.getTextRun(index + startIndex) || { ts: {}, st: 0, ed: 0 };
+        : viewModel.getTextRun(index + startIndex) || { ts: {}, st: 0, ed: 0 };
     const { st, ed } = textRun;
     let { ts: textStyle = {} } = textRun;
     const cache = fontCreateConfigCache.getValue(st, ed);
