@@ -35,6 +35,14 @@ describe('Test datevalue function', () => {
             const dateText2 = StringValueObject.create('5-Jul');
             const result2 = testFunction.calculate(dateText2);
             expect(result2.getValue()).toStrictEqual(45478);
+
+            const dateText3 = StringValueObject.create('2020-01-02 13:14:15');
+            const result3 = testFunction.calculate(dateText3);
+            expect(result3.getValue()).toStrictEqual(43832);
+
+            const dateText4 = StringValueObject.create('10:11:12');
+            const result4 = testFunction.calculate(dateText4);
+            expect(result4.getValue()).toStrictEqual(0);
         });
 
         it('Date text number', () => {

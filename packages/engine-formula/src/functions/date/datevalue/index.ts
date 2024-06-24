@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { parseDate } from '../../../basics/date';
+import { isDate, parseFormattedValue } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -41,10 +41,12 @@ export class Datevalue extends BaseFunction {
     private _handleSingleObject(dateTextObject: BaseValueObject) {
         if (dateTextObject.isString()) {
             const value = `${dateTextObject.getValue()}`;
-            const parsedDate = parseDate(value);
+            const parsedDate = parseFormattedValue(value);
             if (parsedDate) {
                 const { v, z } = parsedDate;
-                return NumberValueObject.create(v);
+                if (isDate(z)) {
+                    return NumberValueObject.create(Math.trunc(v));
+                }
             }
         }
 
