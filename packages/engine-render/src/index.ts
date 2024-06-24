@@ -50,3 +50,4 @@ export { DocumentSkeleton } from './components/docs/layout/doc-skeleton';
 export { ThinEngine } from './thin-engine';
 export { getCharSpaceApply, getNumberUnitValue } from './components/docs/layout/tools';
 export { type IChangeObserverConfig } from './scene.transformer';
+export { DocumentEditArea } from './components/docs/view-model/document-view-model';

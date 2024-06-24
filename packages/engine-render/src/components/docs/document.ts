@@ -37,6 +37,7 @@ import type { IDocumentsConfig, IPageMarginLayout } from './doc-component';
 import { DocComponent } from './doc-component';
 import { DOCS_EXTENSION_TYPE } from './doc-extension';
 import type { DocumentSkeleton } from './layout/doc-skeleton';
+import { DocumentEditArea } from './view-model/document-view-model';
 
 export interface IPageRenderConfig {
     page: IDocumentSkeletonPage;
@@ -178,6 +179,8 @@ export class Documents extends DocComponent {
             return;
         }
 
+        const isEditBody = this.getSkeleton()?.getViewModel().getEditArea() === DocumentEditArea.BODY;
+
         this._drawLiquid.reset();
 
         const { pages, skeHeaders, skeFooters } = skeletonData;
@@ -291,8 +294,10 @@ export class Documents extends DocComponent {
 
             this._startRotation(ctx, finalAngle);
 
-            // ctx.save();
-            // ctx.globalAlpha = 0.5;
+            if (isEditBody) {
+                ctx.save();
+                ctx.globalAlpha = 0.5;
+            }
 
             for (const section of sections) {
                 const { columns } = section;
@@ -488,7 +493,10 @@ export class Documents extends DocComponent {
                     this._drawLiquid.translateRestore();
                 }
             }
-            // ctx.restore();
+
+            if (isEditBody) {
+                ctx.restore();
+            }
 
             this._resetRotation(ctx, finalAngle);
 
@@ -539,6 +547,12 @@ export class Documents extends DocComponent {
     ) {
         if (this._drawLiquid == null) {
             return;
+        }
+        const isEditHeaderFooter = this.getSkeleton()?.getViewModel().getEditArea() === DocumentEditArea.HEADER_FOOTER;
+
+        if (isEditHeaderFooter) {
+            ctx.save();
+            ctx.globalAlpha = 0.5;
         }
         const { sections } = page;
 
@@ -682,6 +696,10 @@ export class Documents extends DocComponent {
             }
 
             this._drawLiquid.translateRestore();
+        }
+
+        if (isEditHeaderFooter) {
+            ctx.restore();
         }
     }
 
