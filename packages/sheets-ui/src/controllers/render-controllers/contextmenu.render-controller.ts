@@ -46,7 +46,7 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
     }
 
     private _addListeners(): void {
-        const spreadsheetPointerDownObserver = (this._context?.mainComponent as Spreadsheet)?.pointerDown$;
+        const spreadsheetPointerDownObserver = (this._context?.mainComponent as Spreadsheet)?.onPointerDown$;
         const spreadsheetSubscription = spreadsheetPointerDownObserver.subscribeEvent((event) => {
             if (event.button === 2) {
                 const selections = this._selectionManagerService.getSelections();
@@ -89,7 +89,7 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
         this.disposeWithMe(spreadsheetSubscription);
 
         const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
-        const rowHeaderSub = spreadsheetRowHeader.pointerDown$.subscribeEvent((event) => {
+        const rowHeaderSub = spreadsheetRowHeader.onPointerDown$.subscribeEvent((event) => {
             if (event.button === 2) {
                 this._contextMenuService.triggerContextMenu(event, SheetMenuPosition.ROW_HEADER_CONTEXT_MENU);
             }
@@ -97,7 +97,7 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
         this.disposeWithMe(rowHeaderSub);
 
         const spreadsheetColumnHeader = this._context.components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
-        const colHeaderObserver = spreadsheetColumnHeader.pointerDown$.subscribeEvent((event) => {
+        const colHeaderObserver = spreadsheetColumnHeader.onPointerDown$.subscribeEvent((event) => {
             if (event.button === 2) {
                 this._contextMenuService.triggerContextMenu(event, SheetMenuPosition.COL_HEADER_CONTEXT_MENU);
             }

@@ -315,7 +315,7 @@ export class EndEditController extends Disposable {
 
         this.disposeWithMe(
             toDisposable(
-                documentComponent.pointerDown$.subscribeEvent(() => {
+                documentComponent.onPointerDown$.subscribeEvent(() => {
                     if (this._cursorChange === CursorChange.StartEditor) {
                         this._cursorChange = CursorChange.CursorChange;
                     }
